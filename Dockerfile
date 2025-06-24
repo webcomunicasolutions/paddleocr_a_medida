@@ -3,8 +3,10 @@ FROM python:3.10-slim
 
 # 2. Instala librerías necesarias del sistema para PDF y OCR
 RUN apt-get update && \
-    apt-get install -y libgl1 poppler-utils tesseract-ocr tesseract-ocr-spa tesseract-ocr-eng \
-    libglib2.0-0 libsm6 libxext6 libxrender-dev \
+    apt-get install -y \
+      gcc g++ make gfortran libopenblas-dev liblapack-dev \
+      libgl1 poppler-utils tesseract-ocr tesseract-ocr-spa tesseract-ocr-eng \
+      libglib2.0-0 libsm6 libxext6 libxrender-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 3. Carpeta de trabajo
