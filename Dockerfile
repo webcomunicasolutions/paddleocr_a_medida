@@ -1,31 +1,41 @@
-# 1. Imagen base: Python slim, más ligera y control total
-FROM python:3.9-slim
+FROM python:3.10-slim
 
-# 2. Instala librerías necesarias del sistema para PDF y OCR
-RUN apt-get update && \
-    apt-get install -y \
-      gcc g++ make gfortran libopenblas-dev liblapack-dev \
-      libgl1 poppler-utils tesseract-ocr tesseract-ocr-spa tesseract-ocr-eng \
-      libglib2.0-0 libsm6 libxext6 libxrender-dev \
+ENV PYTHONUNBUFFERED=1
+ENV PADDLE_HOME=/opt/paddle_models
+
+# Dependencias del sistema
+RUN apt-get update && apt-get install -y \
+    gcc g++ libopenblas-dev liblapack-dev \
+    libgl1-mesa-glx libglib2.0-0 libsm6 libxext6 \
+    poppler-utils curl \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# 3. Carpeta de trabajo
 WORKDIR /app
 
-# 4. Copia tu script
-COPY ocr_server.py /app/ocr_server.py
+# Instalar Python packages
+RUN pip install --no-cache-dir \
+    paddlepaddle==2.6.1 \
+    paddleocr==2.7.3 \
+    pdf2image==1.17.0 \
+    flask==3.0.0
 
-# 5. Instala PaddleOCR, pdf2image y Flask por si quieres API (no ocupa casi nada)
-RUN pip install --no-cache-dir paddleocr==3.0.1 paddlepaddle==2.4.2 paddlex==2.1.0 pdf2image pillow flask
+# Copiar código
+COPY . /app/
 
-# 6. Volumen para modelos de PaddleOCR (persistentes)
-VOLUME ["/root/.paddleocr"]
+# Pre-descargar modelos
+RUN python -c "
+from paddleocr import PaddleOCR
+print('Descargando modelos...')
+PaddleOCR(lang='en', use_gpu=False, show_log=False)
+PaddleOCR(lang='es', use_gpu=False, show_log=False)
+print('Modelos listos!')
+"
 
-# 7. Volumen para tus datos (input/output)
-VOLUME ["/app/data"]
+# Crear directorios
+RUN mkdir -p /app/data/input /app/data/output
 
-# 8. Puerto para API (opcional, puedes quitar si solo CLI)
 EXPOSE 8501
+HEALTHCHECK --interval=30s --timeout=10s --start-period=120s \
+    CMD curl -f http://localhost:8501/health || exit 1
 
-# 9. Comando por defecto: modo CLI
-ENTRYPOINT ["python", "/app/ocr_server.py"]
+CMD ["python", "app.py"]
