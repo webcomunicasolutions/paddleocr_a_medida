@@ -14,7 +14,7 @@ WORKDIR /app
 COPY ocr_server.py /app/ocr_server.py
 
 # 5. Instala PaddleOCR, pdf2image y Flask por si quieres API (no ocupa casi nada)
-RUN pip install --no-cache-dir paddleocr==3.0.1 paddlepaddle==2.4.2 pdf2image pillow flask
+RUN pip install --no-cache-dir paddleocr==3.0.1 paddlepaddle==2.4.2 paddlex==2.1.0 pdf2image pillow flask
 
 # 6. Volumen para modelos de PaddleOCR (persistentes)
 VOLUME ["/root/.paddleocr"]
