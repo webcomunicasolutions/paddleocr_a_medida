@@ -14,7 +14,6 @@ from pdf2image import convert_from_path
 
 # Configuración optimizada para PaddleOCR 3.0 (CPU)
 OCR_CONFIG = {
-    "use_gpu": False,
     "use_textline_orientation": True,
     "show_log": False,
     "text_det_limit_side_len": 960,
