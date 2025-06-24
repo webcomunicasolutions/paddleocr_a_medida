@@ -1,5 +1,5 @@
 # 1. Imagen base: Python slim, más ligera y control total
-FROM python:3.10-slim
+FROM python:3.9-slim
 
 # 2. Instala librerías necesarias del sistema para PDF y OCR
 RUN apt-get update && \
